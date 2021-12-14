@@ -8,15 +8,15 @@ type Rules = HashMap<(char, char), char>;
 fn parse_input(input: &str) -> (Rules, Seq) {
     let (start_seq, pairs) = input.trim().split_once("\n\n").unwrap();
 
-    let rules: HashMap<(char, char), char> = pairs
+    let rules = pairs
         .lines()
         .filter_map(|l| l.split(" -> ").collect_tuple::<(&str, &str)>())
-        .filter_map(|(lhs, rhs)| {
-            lhs.chars()
-                .collect_tuple::<(char, char)>()
-                .map(|(c1, c2)| ((c1, c2), rhs))
+        .map(|(lhs, rhs)| {
+            (
+                lhs.chars().collect_tuple::<(char, char)>().unwrap(),
+                rhs.chars().next().unwrap(),
+            )
         })
-        .filter_map(|(lhs, rhs)| rhs.chars().next().map(|c| (lhs, c)))
         .collect();
 
     let seq = format!("_{}_", start_seq).chars().tuple_windows().counts();
@@ -25,9 +25,9 @@ fn parse_input(input: &str) -> (Rules, Seq) {
 }
 
 pub fn grow_n_count(input: &str, i: usize) -> usize {
-    let (rules, seq) = parse_input(input);
+    let (rules, init_seq) = parse_input(input);
 
-    let seq = (0..i).fold(seq, |seq, _i| {
+    let seq = (0..i).fold(init_seq, |seq, _i| {
         let mut new_seq = HashMap::new();
 
         for ((c1, c2), count) in seq {
@@ -46,13 +46,12 @@ pub fn grow_n_count(input: &str, i: usize) -> usize {
         *counts.entry(c1).or_insert(0) += count;
         *counts.entry(c2).or_insert(0) += count;
     }
-
     counts.remove(&'_');
 
-    if let MinMaxResult::MinMax(min, max) = counts.values().minmax() {
-        return (*max - *min) / 2;
+    match counts.values().minmax() {
+        MinMaxResult::MinMax(min, max) => (*max - *min) / 2,
+        _ => 0,
     }
-    0
 }
 
 pub fn p1(input: &str) -> usize {
