@@ -61,7 +61,7 @@ fn score_completion(s: String) -> usize {
 pub fn p1(input: &str) -> usize {
     input
         .lines()
-        .filter_map(|l| illegal_char(l))
+        .filter_map(illegal_char)
         .map(score_corrupted)
         .sum()
 }
@@ -69,7 +69,7 @@ pub fn p1(input: &str) -> usize {
 pub fn p2(input: &str) -> usize {
     let mut scores = input
         .lines()
-        .filter_map(|l| completion_chars(l))
+        .filter_map(completion_chars)
         .map(score_completion)
         .collect::<Vec<usize>>();
 

@@ -1,9 +1,23 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use itertools::{Itertools, MinMaxResult};
 
 type Seq = HashMap<(char, char), usize>;
 type Rules = HashMap<(char, char), char>;
+
+pub struct S(Seq);
+
+impl Display for S {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let a = self
+            .0
+            .iter()
+            .map(|((a, b), i)| format!("\"{}{}\": {}", a, b, i))
+            .join(", ");
+
+        f.write_str(&format!("{{ {} }} ", a))
+    }
+}
 
 fn parse_input(input: &str) -> (Rules, Seq) {
     let (start_seq, pairs) = input.trim().split_once("\n\n").unwrap();
@@ -27,8 +41,12 @@ fn parse_input(input: &str) -> (Rules, Seq) {
 pub fn grow_n_count(input: &str, i: usize) -> usize {
     let (rules, init_seq) = parse_input(input);
 
+    println!("{:?}", init_seq);
+
     let seq = (0..i).fold(init_seq, |seq, _i| {
         let mut new_seq = HashMap::new();
+
+        println!("after {} step: {}", _i, S(seq.clone()));
 
         for ((c1, c2), count) in seq {
             if let Some(&c_mid) = rules.get(&(c1, c2)) {
@@ -40,6 +58,8 @@ pub fn grow_n_count(input: &str, i: usize) -> usize {
         }
         new_seq
     });
+
+    println!("after {} step: {}", i, S(seq.clone()));
 
     let mut counts = HashMap::new();
     for ((c1, c2), count) in seq {
